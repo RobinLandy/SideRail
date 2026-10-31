@@ -44,8 +44,11 @@ Checked on disk, not only in code: a page whose text exists only after its scrip
 read by the panel and found by a search, and none of the 186 files in the browser profile
 contained that text afterwards.
 
-The README opens with a new description and screenshots of the panel, the tour of the panel
-is a page rather than five, and a closing section names the licence, the three third-party
+The README is rewritten for someone using SideRail rather than building it: a new
+description and screenshots, the features in the order you meet them, everything about
+privacy and permissions in one section, and a short section for developers at the end. The
+design history, internals and test notes are gone (they live in the changelog and the code),
+and it is about 40% shorter. A closing section names the licence, the three third-party
 components and their licences, and the licence's warranty disclaimer.
 
 ## 0.25.0 — what should never have been kept, and a tree fit to publish
