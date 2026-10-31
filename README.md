@@ -11,6 +11,8 @@ and sorted the way you want them, and a search box finds any open tab by its tit
 address or (if you allow it) the words on the page. Everything it knows stays on your
 computer.
 
+![SideRail docked on the left of a Chrome window: the Home space, with YouTube and Shopping groups made by rules](docs/screenshots/hero.png)
+
 ---
 
 ## What it does
@@ -172,27 +174,6 @@ box and then sent your typing to the page behind it. An in-panel key worked, but
 you had already clicked into the panel — by which point clicking is the same gesture. Both
 were removed in 0.21.0. The palette opens from the **›** button beside the search box.
 
-### The one thing that doesn't work, and can't
-
-**Chrome does not let an extension move keyboard focus into its own side panel.** Press the
-browser shortcut while you're on a web page and the palette opens — but your keystrokes keep
-going to the page until you click the panel once. `sidePanel.open()` focuses the panel only
-when it was closed; `element.focus()` and `window.focus()` are no-ops from inside it; there
-is no API for it.
-
-This is a known Chromium limitation, [discussed at length on
-chromium-extensions](https://groups.google.com/a/chromium.org/g/chromium-extensions/c/nb058-YrrWc)
-and tracked as [w3c/webextensions#693](https://github.com/w3c/webextensions/issues/693).
-
-A third-party FAQ claims it was fixed in Chrome 148. **It wasn't** — or at least not for
-every path: it still happens on Chromium 151. Treat any "fixed in version N" claim about
-this with suspicion until you've reproduced the fix yourself.
-
-SideRail can't work around it, so it names it instead: when the palette opens without
-keyboard focus it says so across the top, and a click anywhere in the box starts you
-typing. A palette that silently swallows your input is far worse than one
-that tells you where the input went.
-
 ### In the panel
 
 - **Click** a tab to switch to it
@@ -254,6 +235,8 @@ Defuddle is MIT-licensed and releases are at
 <https://github.com/kepano/defuddle/releases>.
 
 ## Rules — automatic filing and tab groups
+
+<p><img src="docs/screenshots/rules.png" width="374" alt="The Rules screen: when rules run, and the YouTube rule with its pattern"></p>
 
 A rule is **a match plus up to two actions**: file matching tabs into a space, and put them
 in a named tab group. Either can be left blank, and setting both is the normal case —
@@ -335,36 +318,56 @@ Turn it off and use "Run rules now" by hand. Right-click any tab for
 **New rule for &lt;domain&gt;**, or right-click a group header for **Make a rule from
 this group** to turn an existing group into a permanent one.
 
-## Searching inside pages
+## Searching
 
-Type in the search box and the tab list narrows by title and address. Below that, once you
-have granted **page access**, is *Page text*: the same search run against the visible text of
-every open tab. Each tab is read **once** — a small reader runs in it and returns its text with
-the navigation, header and footer stripped — and everything after that is a local search in
-the panel, live as you type. Text read while a tab was awake stays searchable after Chrome
-puts it to sleep (💤 on the hit). Tabs Chrome has unloaded can be woken, read and put back, a
-few at a time. The index of your open tabs is held in the panel's memory and is never written
-to disk.
+Type in the search box and the list narrows to tabs whose title or address matches, as you
+type. Every word has to match, so adding words narrows the list, and initials work too (`gd`
+finds Google Docs). Below the matching tabs, the results carry on in sections:
 
-**Nothing read is stored.** The text lives in the panel's memory while the panel is open and
-is gone when it closes; it is never written to disk, never sent anywhere, and not in Export.
-Card numbers, IBANs, account numbers, National Insurance and Social Security numbers are
-removed even from that memory. Versions 0.23 to 0.25 kept read pages in a database so a
-closed page could be found again; 0.26 removed that and deletes the database on first run,
-for the reason given in the changelog.
+1. **Page text:** open tabs whose page mentions what you typed, even though the title and
+   address don't. This needs permission to read pages; see below.
+2. **Bookmarks** and **History**, if you've allowed SideRail to see them. Each bookmark shows
+   the folder it lives in.
+3. **Web:** a search engine search, as a last resort.
+
+### Searching the text of open tabs
+
+SideRail can't read pages when you install it. The first time you search, a box offers to ask
+for that permission; Chrome asks once, for all sites, never site by site. **Revoke page
+access**, under the results and in Settings, takes it back.
+
+<p>
+  <img src="docs/screenshots/page-access-ask.png" width="374" alt="Before page access: the offer to search inside the text of open tabs">
+  <img src="docs/screenshots/page-text-search.png" width="374" alt="After: a search for microfoam finds four open tabs by their page text">
+</p>
+
+Each open tab is read once. A small reader is put into the tab, hands back the visible text
+(without menus, headers and footers) and is removed; after that, every keystroke searches the
+panel's own copy, so results appear as you type. Tabs Chrome has put to sleep can't be read
+without waking them, so the results say how many there are, and a button wakes them, reads
+them and puts them back to sleep.
+
+**Nothing read is stored.** The text is held in the panel's memory while the panel is open,
+and is dropped when its tab or the panel closes. It's never written to disk, never sent
+anywhere, and never included in an export. Card numbers, IBANs, account numbers, National
+Insurance and Social Security numbers are removed even from that copy.
 
 **Some pages are never read.** Banks, card issuers, insurers, webmail, personal messaging,
-dating, payment and health services, password vaults and government services are on a
-built-in list of ~18,000 sites, derived from the UT1 blacklists (CC BY-SA) with additions for
-what they miss. Any host whose first label is a sign-in word (`accounts.`, `login.`,
-`myaccount.`…) and any search-engine results page are skipped too, under the same switch.
-An address that carries a password, token or OAuth code is never read whatever the switch
-says. Add your own patterns in Settings → *Pages that are never read*, or mark a whole space
-**Private** from its card. A page can also decline on its own: `noindex`, a payment form, or
-a login page. The results say which tabs were not read and why. Team chat — Slack, Discord,
-Teams — is *not* on the list; it is exactly what you tend to want to find.
+dating, payment and health services, password managers and government services are on a
+built-in list of about 18,000 sites, derived from the UT1 blacklists (CC BY-SA) with additions
+for what they miss. Sign-in and account pages (`accounts.`, `login.`, `myaccount.` and so on)
+and search engine results are skipped too, under the same switch. An address that carries a
+password, token or sign-in code is never read, whatever the switch says. You can add your own
+sites in Settings, under *Pages that are never read*, or mark a whole space **Private**. A page
+can also decline on its own (`noindex`, a payment form or a login page), and the results say
+which tabs were not read and why. Team chat such as Slack, Discord and Teams is deliberately
+not on the list: it's exactly what you tend to want to find.
+
+<p><img src="docs/screenshots/never-read.png" width="374" alt="Settings: the built-in never-read list, and a box for your own sites"></p>
 
 ## The command palette
+
+<p><img src="docs/screenshots/palette.png" width="374" alt="The command palette after typing lis: two tabs from the Trips space, one from Home, and a web search"></p>
 
 The **›** button beside the search box opens one ranked list over everything: **open tabs** from every
 window — each showing which space it's in — **spaces** to switch to, **commands**, and
@@ -389,145 +392,50 @@ you. The web search is always there, at the bottom.
 overlay rather than a view, so closing it leaves whatever you were looking at exactly as it
 was — scroll position included.
 
-## The two shells
+## Finding your way around
 
-SideRail has two screens, not five tabs. **Browsing** is where you live; **management** is
-somewhere you visit and come back from. Browsing is not a peer of Settings, and modelling
-it as one is what made the old five-button nav row spend permanent vertical space
-advertising four screens you rarely open.
+The panel has two screens. The **tab list** is where you spend your time. **Manage
+SideRail**, behind the cog, is where you set things up, and its back arrow returns you to the
+tab list exactly as you left it.
 
-### Browsing
+The tab list, from top to bottom:
 
-The header is the tab search field and a single **Manage SideRail** cog. The live tab count
-sits inside the search field. Below that, in order:
+- **Search.** The box filters your tabs as you type and shows how many are open. The **›**
+  beside it opens the command palette.
+- **Spaces.** One entry per space, with its emoji and how many tabs it holds. Click to switch;
+  drop tabs on one to move them there.
+- **Pinned tabs** for the space you're in, as small tiles. Drag to reorder, or drag a tab onto
+  the row to pin it.
+- **Jump to a group.** One capsule per tab group: click to scroll to it, drag to reorder.
+  The **⋯** on this row holds the window-wide actions: group tabs by site, ungroup everything,
+  run your rules now, save the window as a space, export or import your data.
+- **The tabs**, with tab groups as collapsible sections.
+- **Three buttons along the bottom:** Dedupe, Defuddle (the reader view) and archive.is.
 
-**The space switcher** — each space as a text tab with its emoji, name and count, the
-current one carrying a 3px accent underline. This is the only underlined navigation on the
-screen. It is always **one line**: more spaces than fit scroll sideways rather than taking a
-second row. Switching a space closes, reloads and moves nothing; dropping tabs on one
-assigns them to it.
+Manage SideRail has four sections: **Spaces**, **Rules**, **Rewind** and **Settings**. Each
+has its own filter box, separate from the tab search, and everything in them can also be
+reached from the command palette.
 
-**`Pinned in {space}`** — a caption, then the pinned tabs of the space you're in as square
-favicon tiles. They share the available width evenly and only wrap to a second row below
-28px each. Drag to reorder; drag an ordinary tab onto the strip to pin it there.
+### Rewind
 
-**`↳ Jump to a group`** — a caption, then one named capsule per tab group, with a dot in the
-group's colour. Click one and the panel scrolls to that group and switches to its most
-recently used tab; if you're already in that group it just scrolls, rather than yanking you
-to a different tab. This row is also always one line — what doesn't fit **scrolls
-sideways**, the same gesture as the space switcher.
+Every five minutes SideRail records what's open in each window, and which space each tab was
+in, keeping the last 50 snapshots. Nothing is recorded when nothing has changed, so a quiet
+evening doesn't push useful snapshots out. From any snapshot you can **Restore** it into a new
+window (never over the top of what you have), **Re-pin** just the tabs that were pinned, or
+**Keep as a space**. **Take one now** records one by hand.
 
-Both captions are attached to what they label by proximity — 2px below the caption, 9px
-above the next one — rather than by a box. That matters more than it sounds: the same
-service can appear as a pinned tile *and* a group capsule, and without the words and the
-different shapes they are the same small coloured control twice.
+<p><img src="docs/screenshots/rewind.png" width="374" alt="Rewind: two snapshots, each with its spaces, tabs and Restore, Re-pin and Keep as a space"></p>
 
-**Drag the capsules to reorder them.** The order is saved (keyed by group name, so it
-survives restarts even though Chrome's group IDs don't) and is independent of where the
-groups sit in the tab strip — put the ones you use most on the left. New groups append on
-the right; *Reset jump-bar order* in the **⋯** menu clears the custom order.
+### Dedupe
 
-The **⋯** on the jump caption line holds the window-level actions: *Group tabs by domain*,
-*Ungroup all tabs*, *Apply rules to this window*, *Save window as a Space*, and *Reset
-jump-bar order*. It is there even when there are no groups, so those stay reachable.
+Dedupe finds tabs open at the same address and shows them to you before closing anything. It
+suggests a copy to keep (the tab you're on, otherwise the one with the tidiest address,
+otherwise the leftmost) and ticks the rest; you adjust the ticks and press Close, or Cancel.
+Tracking parameters such as `utm_source` and `fbclid` are ignored when comparing addresses, as
+is the order of the rest, so a link opened from a newsletter counts as a copy of the tab you
+already had. Pinned tabs are never included.
 
-The footer is three equal columns — **Dedupe**, **Defuddle**, **archive.is** — each an icon
-and a short label. Dedupe **greys out** when there are no duplicates rather than
-disappearing; three peers that come and go make the row a moving target.
-
-### Management
-
-The cog opens a separate screen: a back arrow, the title *Manage SideRail*, and exactly four
-sections — **Spaces**, **Rules**, **Rewind**, **Settings**. There is no Tabs section,
-because going back to tabs is going *back*.
-
-Browsing and management keep **separate search text**, and each management section keeps its
-own filter. Carrying a rules filter into the tab list would silently hide tabs with nothing
-on screen connecting the two. Back restores your tab filter, your scroll position, and puts
-focus on the cog.
-
-Everything in management is also one click and a word away in the command palette.
-
-### Search
-
-Search results come back in sections:
-
-1. **Tabs** — matched on hostname first, then title, then the rest of the URL, then
-   initials (`gd` → Google Docs). Every whitespace-separated term must match, so
-   `git super` narrows rather than widens. Loose subsequence matching is a last resort,
-   applies to the title only, and rejects anything scattered — which is what stops
-   `supercharge` dragging in `github.com/0ponn/upstack`.
-2. **Page text** — open tabs that *contain* the word somewhere on the page but don't
-   match by URL or title. See below.
-3. **Bookmarks** — each result shows **the folder it lives in** (`Other bookmarks / Watch
-   Later`, `Mobile bookmarks`, …), so you can always see where a hit came from. If results
-   appear that you can't find in the bookmark manager, the folder line usually explains it:
-   `Mobile bookmarks` is your phone, and `Other bookmarks` is easy to overlook.
-4. **History** — deduplicated by URL, with the last-visit time, newest first within
-   equally-good matches.
-5. **Web** — a fallback search.
-
-Bookmarks and History show the first few with a **Show N more** button; the section
-header always gives the true total.
-
-Bookmarks and history are queried **independently and defensively**: one failing can't
-silently empty the other, the permission is re-checked on every search rather than trusted
-from boot, and any API error is shown in the panel in red instead of disappearing into a
-rejected promise. If access is granted but nothing comes back, you get an explicit *No
-bookmark or history matches* line — and a **Re-request access** button, which rebinds the
-APIs if Chrome dropped them.
-
-### Page-text search
-
-Reading text inside a page means running code in that page, which needs host access.
-SideRail declares `<all_urls>` under `optional_host_permissions` — **not granted at
-install**. The first time you search inside pages the browser asks once, for all sites; you
-are never prompted per tab or per domain. A **Revoke page access** button sits at the bottom
-of the section, and `chrome://extensions` can revoke it too.
-
-There are no persistent content scripts. A small reader is placed in a tab only to read it,
-hands back the page's visible text, and is gone. Each tab is read once per page version;
-after that every keystroke is a local search. Inside the page the reader keeps a 400 ms
-budget and takes at most 300,000 characters, reporting *partial* if it hits either, so a
-YouTube-sized DOM cannot stall a sweep. Up to 24 tabs are read at a time, with a 1.5 s cap on
-each from the panel's side.
-
-Frozen and discarded tabs run nothing, and an injection into one simply waits for the tab to
-wake ([w3c/webextensions#527](https://github.com/w3c/webextensions/issues/527)), so they are
-skipped and counted as *asleep* rather than waited on. Text read while a tab was awake stays
-searchable after it sleeps. The *Wake N sleeping tabs* button reloads them a few at a time,
-reads them, and puts them back to sleep.
-
-**Rewind** — an automatic rolling snapshot of every window, taken every five minutes, last
-50 kept. Snapshots record **pinned state**, so a snapshot card holding pinned tabs offers
-**Re-pin N tabs**, which pins just those back into the current window and skips any already
-open — the quickest way back from an accidental unpin. Identical consecutive states are skipped, so an idle machine doesn't
-flush the buffer. Restore any snapshot into a new window, or promote it to a Space.
-
-**No scrollbar gutter.** The list has no native scrollbar; a thin indicator is drawn *over*
-the content while you scroll and fades once you stop. Styling `::-webkit-scrollbar` at all
-opts Blink into a classic scrollbar, which reserves its width permanently whether you're
-scrolling or not — on a panel that can't go below ~360px, that is width taken from every tab
-title. Removing it rather than un-styling it also covers the case where the OS is set to
-always show scrollbars.
-
-URLs are compared **canonically**: tracking parameters are ignored (all `utm_*`, ad
-click ids like `gclid`/`fbclid`/`msclkid`, newsletter tokens like `mc_cid`/`mkt_tok`,
-and referral params like `ref`/`ref_src`), remaining parameters are sorted so
-`?a=1&b=2` matches `?b=2&a=1`, and a trailing slash is dropped. Meaningful parameters
-survive — `youtube.com/watch?v=…` still distinguishes videos — and a fragment that looks
-like a client-side route (`#/inbox`) is kept, since those are genuinely different pages.
-The lists live at the top of `common.js` and are yours to edit.
-
-Each row shows the parameters that were ignored, so a match is always explainable, and
-the keeper defaults to the **cleanest** URL — a link opened from a newsletter loses to the
-tidy copy you already had open.
-
-**Dedupe never closes anything on its own.** It opens a review sheet listing every
-duplicate URL and all its copies, suggests a keeper (the active tab, else the
-leftmost) and pre-ticks the rest. You adjust the ticks, then press *Close N tabs* —
-or Cancel, which closes nothing. Fragments are ignored when comparing URLs, and
-pinned tabs are excluded entirely.
+<p><img src="docs/screenshots/dedupe.png" width="374" alt="Dedupe: one duplicate address, the copy to keep marked, the other ticked to close"></p>
 
 ---
 
@@ -544,6 +452,7 @@ icons/                      app and toolbar icons
 vendor/                     pinned Defuddle bundle + provenance, the emoji table, the never-read list
 LICENSE, NOTICE             Apache-2.0, and the name and icon that are not part of the grant
 THIRD-PARTY-NOTICES.md      licences of what ships inside the package
+docs/screenshots/           the images in this README (not shipped in the package)
 PRIVACY.md                  what is kept, where, and what never happens
 SECURITY.md                 how to report a way round any of that
 CHANGELOG.md                what changed in each version, and why
@@ -669,6 +578,11 @@ carries no `[SideRail vX.Y.Z]` prefix, it predates the build you're running.
 
 ## Spaces
 
+<p>
+  <img src="docs/screenshots/space-work.png" width="374" alt="The Work space: Docs, Code and LinkedIn groups">
+  <img src="docs/screenshots/space-coffee.png" width="374" alt="The Coffee space: a pinned tab, Wikipedia tabs and a YouTube group">
+</p>
+
 A space is a **label on a tab**, not a container of tabs. Switching between them makes
 **zero browser calls** — nothing is closed, moved, grouped or reloaded — so it is instant
 and cannot cost you a scroll position or a half-typed form.
@@ -750,6 +664,8 @@ tabs. If that happens the spaces are all still here — each shows its saved cou
 Chromium**, which is what rules out the option everyone actually wants.
 
 ## Hover previews
+
+![Hovering a tab: a card with a thumbnail of the page, its full title, site and when it was last seen, drawn beside the panel](docs/screenshots/hover-preview.png)
 
 Hovering a tab for a moment brings up a card with the **full title** (untruncated, up to
 three lines), the **domain**, a **thumbnail** of the page, and state chips — pinned,
@@ -933,4 +849,23 @@ It's plain ES modules, no build step. Edit a file, hit the reload arrow on
 - `periodInMinutes` in `background.js` — snapshot cadence (5)
 - `--accent` and the `--g-*` group colours in `sidepanel.css`
 
-Licensed under the Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+## Licence, third-party software and warranty
+
+SideRail is released under the **Apache License 2.0**; the full text is in
+[LICENSE](LICENSE). [NOTICE](NOTICE) explains that the name and icon are not part of that
+licence, so a fork should use its own.
+
+It includes three pieces of other people's work, each under its own licence. The notices are
+reproduced in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), which ships inside every
+release:
+
+- **[Defuddle](https://github.com/kepano/defuddle)**, by Steph Ango, which extracts the
+  article for the reader view. MIT licence.
+- **Unicode emoji data**, for the emoji picker when you name a space. Unicode License V3.
+- **The UT1 blacklists**, maintained by Université Toulouse Capitole, which the built-in
+  never-read list is derived from. Creative Commons Attribution-ShareAlike (CC BY-SA); the
+  derived list in `vendor/exclusions.js` is under the same licence.
+
+**No warranty.** SideRail is provided "as is", without warranties or conditions of any kind,
+and without liability for any loss or damage that comes from using it. Sections 7 and 8 of
+the licence set out the terms in full. In short: you use it at your own risk.

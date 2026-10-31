@@ -30,10 +30,10 @@ read, once each. Tabs the browser has put to sleep are read only if you press th
 that wakes them. Nothing is read while you are not searching.
 
 **Where the text goes.** Into the panel's memory, and nowhere else. It is never written to
-disk, never put in `chrome.storage`, and is gone when the panel closes. Versions 0.23.0 to
-0.25.0 kept read pages in an IndexedDB database so a closed page could be found again;
-0.26.0 removed that feature and deletes the database the first time it runs. The build
-fails if shipped code opens IndexedDB for any other reason.
+disk or put in `chrome.storage`, and it is dropped when its tab closes or the panel does. The
+build fails if shipped code opens a database or writes to sync storage. (Like anything in
+memory, the operating system may move it to its swap file under memory pressure; macOS
+encrypts swap.)
 
 **Redaction, before anything is held.** Card numbers that pass the Luhn check, IBANs, UK
 sort-code-and-account pairs, UK National Insurance numbers and US Social Security numbers

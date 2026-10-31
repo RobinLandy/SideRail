@@ -40,6 +40,14 @@ controls, that text read from a page never reaches `chrome.storage.local`, and t
 retention keys are gone from the settings record after boot. The page-access chip says again
 that the text stays in the panel and is never written to disk, which is true again.
 
+Checked on disk, not only in code: a page whose text exists only after its script runs was
+read by the panel and found by a search, and none of the 186 files in the browser profile
+contained that text afterwards.
+
+The README opens with a new description and screenshots of the panel, the tour of the panel
+is a page rather than five, and a closing section names the licence, the three third-party
+components and their licences, and the licence's warranty disclaimer.
+
 ## 0.25.0 — what should never have been kept, and a tree fit to publish
 
 An audit of a real store after seven weeks of **Read pages as I browse**: 2,000 pages,
