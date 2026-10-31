@@ -2,7 +2,7 @@
 
 SideRail is a Chrome extension that shows your tabs as a vertical list in the browser's side
 panel, and helps you keep them in order. I built it for myself: I usually have far more tabs
-open than Chrome's tab strip can cope with, and somewhere along the way I stopped looking at
+open than Chrome or Helium's tab strip can cope with, and somewhere along the way I stopped looking at
 the tab strip at all. It's free and open source, and I'm sharing it in case it's useful to
 anyone else.
 
