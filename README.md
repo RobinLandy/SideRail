@@ -70,12 +70,11 @@ take on trust:
 - **It doesn't look at your other extensions** (no `management` permission) and doesn't
   touch the security headers of pages you visit (no `declarativeNetRequest`).
 
-It's open source under the Apache License 2.0, and it lives here on GitHub rather than in the
-Chrome Web Store. That means you install it by hand (it takes a couple of minutes; see
-[Install](#install)) and it never updates itself. I think that's the right trade-off for
-something with this much access to your browser: nothing about it changes unless you choose
-to update. It runs in Chrome and in other Chromium-based browsers, including Brave, Edge,
-Vivaldi and Helium (which is what I use).
+It's open source under the Apache License 2.0. For now it lives here on GitHub rather than in
+the Chrome Web Store, although I intend to publish it there too. Until then you install it by
+hand (it takes a couple of minutes; see [Install](#install)), and it doesn't update itself, so
+nothing about it changes until you choose to update. It runs in Chrome and in other
+Chromium-based browsers, including Brave, Edge, Vivaldi and Helium (which is what I use).
 
 ### Permissions, in full
 
@@ -108,7 +107,7 @@ Everything is stored by the extension on this computer. Nothing syncs, nothing i
 
 ## Install
 
-I've not yet deployed Siderail to the Chrome Store (but am intending to). Until then SideRail is installed manually from Github.
+I've not yet deployed SideRail to the Chrome Store (but am intending to). Until then SideRail is installed manually from GitHub.
 
 1. Download the latest `SideRail-<version>.zip` from the
    [releases page](https://github.com/RobinLandy/SideRail/releases) and unzip it somewhere
@@ -144,7 +143,7 @@ empty.
 
 Chrome shows a "Disable developer mode extensions" bubble on startup when unpacked
 extensions are loaded. It is cosmetic — dismiss it and the extension keeps working. It is
-the price of an extension that cannot silently update itself, which is rather the point.
+the price of installing an extension by hand rather than from the Chrome Web Store.
 Some Chromium-based browsers do not show it.
 
 There is a permanent fix for anyone who wants one: pack the extension as a `.crx`, host an
