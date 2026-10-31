@@ -106,7 +106,7 @@ Everything is stored by the extension on this computer. Nothing syncs, nothing i
 
 ## Install
 
-SideRail is installed by hand, which is why it can never update itself.
+I've not yet deployed Siderail to the Chrome Store (but am intending to). Until then SideRail is installed manually from Github.
 
 1. Download the latest `SideRail-<version>.zip` from the
    [releases page](https://github.com/RobinLandy/SideRail/releases) and unzip it somewhere
