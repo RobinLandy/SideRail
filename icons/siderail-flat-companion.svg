@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>SideRail flat companion mark</title>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- Pale halo keeps the transparent glyph legible on light and dark browser chrome. -->
+    <path d="M24 11V117" stroke="#F8F2E4" stroke-width="17"/>
+    <path d="M24 26H50C62 26 63 18 75 18H103" stroke="#F8F2E4" stroke-width="17"/>
+    <path d="M24 64H103" stroke="#F8F2E4" stroke-width="17"/>
+    <path d="M24 86H47C61 86 62 104 78 104H103" stroke="#F8F2E4" stroke-width="17"/>
+
+    <!-- Shared dark keyline. -->
+    <path d="M24 11V117" stroke="#10244B" stroke-width="13"/>
+    <path d="M24 26H50C62 26 63 18 75 18H103" stroke="#10244B" stroke-width="13"/>
+    <path d="M24 64H103" stroke="#10244B" stroke-width="13"/>
+    <path d="M24 86H47C61 86 62 104 78 104H103" stroke="#10244B" stroke-width="13"/>
+
+    <!-- Coloured enamel routes. -->
+    <path d="M24 11V117" stroke="#2157B8" stroke-width="8"/>
+    <path d="M24 26H50C62 26 63 18 75 18H103" stroke="#2F6DE1" stroke-width="8"/>
+    <path d="M24 64H103" stroke="#F4B51D" stroke-width="8"/>
+    <path d="M24 86H47C61 86 62 104 78 104H103" stroke="#56C5A3" stroke-width="8"/>
+  </g>
+
+  <!-- Rail junctions and route terminals. -->
+  <g stroke="#F8F2E4" stroke-width="4">
+    <circle cx="24" cy="26" r="10" fill="#194AA5"/>
+    <circle cx="24" cy="64" r="10" fill="#194AA5"/>
+    <circle cx="24" cy="104" r="10" fill="#194AA5"/>
+    <circle cx="103" cy="18" r="10" fill="#F04432"/>
+    <circle cx="103" cy="64" r="10" fill="#F4B51D"/>
+    <circle cx="103" cy="104" r="10" fill="#194AA5"/>
+  </g>
+  <g fill="none" stroke="#10244B" stroke-width="2.5">
+    <circle cx="24" cy="26" r="10"/>
+    <circle cx="24" cy="64" r="10"/>
+    <circle cx="24" cy="104" r="10"/>
+    <circle cx="103" cy="18" r="10"/>
+    <circle cx="103" cy="64" r="10"/>
+    <circle cx="103" cy="104" r="10"/>
+  </g>
+  <rect x="18" y="4" width="12" height="10" rx="3" fill="#A77BE7" stroke="#F8F2E4" stroke-width="2"/>
+  <rect x="18" y="114" width="12" height="10" rx="3" fill="#A77BE7" stroke="#F8F2E4" stroke-width="2"/>
+</svg>

@@ -1,0 +1,1280 @@
+/* SideRail — side panel styles. Light + dark, compact by design. */
+
+:root {
+  --bg: #ffffff;
+  --bg-sunk: #f4f5f7;
+  --bg-hover: #eceef1;
+  --bg-active: #e3e9f7;
+  --fg: #1b1d21;
+  --fg-dim: #6b7280;
+  --fg-faint: #9aa1ab;
+  --line: #e3e5e9;
+  --accent: #2f6fed;
+  --accent-fg: #ffffff;
+  --danger: #d13b3b;
+  --radius: 8px;
+  --row-h: 30px;
+
+  --g-blue: #4a86e8;   --g-red: #e06666;    --g-yellow: #e6c34a;
+  --g-green: #57a55a;  --g-pink: #d876a8;   --g-purple: #9b6fd0;
+  --g-cyan: #4aa8b8;   --g-orange: #e09146; --g-grey: #9aa1ab;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1b1d21;
+    --bg-sunk: #232629;
+    --bg-hover: #2c3035;
+    --bg-active: #2d3a52;
+    --fg: #e8eaed;
+    --fg-dim: #9aa1ab;
+    --fg-faint: #6b7280;
+    --line: #33373d;
+    --accent: #6f9bf5;
+    --accent-fg: #10131a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/*
+ * Keyboard focus, once, for everything.
+ *
+ * Most controls here set their own background or drop their border, which is
+ * enough to swallow the UA focus ring — and the ring is the only thing telling
+ * a keyboard user where they are. An outline with an offset sits outside the
+ * control's own paint, so nothing can hide it, and `currentColor` on the accent
+ * keeps it visible in both themes.
+ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+/* Text fields already show focus through their border; a second ring is noise. */
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline-offset: -1px; }
+
+/* Author display rules below would otherwise beat the UA rule for [hidden]. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  /* Belt and braces: overflow:hidden should mean no document scrollbar, but a
+     reserved one here would be invisible in the layout and read as a channel
+     down the right-hand edge. */
+  scrollbar-width: none;
+}
+
+body {
+  /* The chosen typeface applies to the whole panel, not just tab titles: a
+     font setting that changes half the text looks like a rendering bug. The
+     rule-pattern box keeps its monospace deliberately — alignment is the point
+     there — and so does anything else that names its own family. */
+  font: 13px/1.4 var(--title-font, system-ui), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app { position: relative; display: flex; flex-direction: column; height: 100%; }
+
+/* ------------------------------------------------------------ header */
+
+#head {
+  flex: 0 0 auto;
+  /* No rule under the search field: the space switcher's own active underline
+     already ends this region, and the sticky block below carries a border and a
+     shadow of its own. Three separators in 40px was two too many. */
+  padding: 4px 8px 4px;
+  background: var(--bg);
+}
+
+/* ------------------------------------------------------------- spaces */
+
+.space-card.is-here { border-color: var(--accent); }
+.space-card .emo { font-size: 15px; line-height: 1; margin-right: 6px; }
+.space-card .here {
+  margin-left: 6px; padding: 0 6px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: .02em;
+  color: var(--accent); background: var(--bg-sunk);
+  border: 1px solid var(--accent);
+}
+/* Status, not action. Deliberately not button-shaped. */
+.space-card .badge {
+  margin-left: 5px; padding: 1px 6px; border-radius: 999px;
+  font-size: 10px; font-weight: 650;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px solid var(--line);
+}
+.space-card .badge.is-showing { color: var(--accent); border-color: var(--accent); }
+.space-card .grip {
+  margin-left: auto; padding: 0 4px;
+  border: 0; background: transparent; border-radius: 4px;
+  color: var(--fg-faint); font-size: 13px; cursor: grab;
+}
+.space-card .grip:active { cursor: grabbing; }
+.space-card.dragging { opacity: .35; }
+.space-card.drag-over { box-shadow: 0 -2px 0 var(--accent); }
+
+/* ------------------------------------------------- keyboard settings */
+
+.key-capture { min-width: 74px; font-variant-numeric: tabular-nums; }
+.key-capture.is-capturing {
+  color: var(--accent); border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.key-test { min-width: 130px; }
+.key-test.is-hit { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+.key-list { padding: 2px 0 6px; }
+.key-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 3px 2px; font-size: 11.5px; color: var(--fg-dim);
+}
+.key-row kbd, .hint kbd {
+  padding: 1px 5px; font: inherit; font-size: 10.5px;
+  color: var(--fg); background: var(--bg-sunk);
+  border: 1px solid var(--line); border-radius: 4px;
+}
+.key-row kbd.unset { color: var(--fg-faint); font-style: italic; }
+
+/* ------------------------------------------------------------- palette */
+
+#palette {
+  position: absolute; inset: 0; z-index: 140;
+  display: flex; flex-direction: column;
+  padding: 8px 8px 10px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(3px);
+}
+#pal-box {
+  display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto;
+  background: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+.pal-top {
+  display: flex; align-items: center; gap: 5px; flex: 0 0 auto;
+  padding: 7px 7px 6px; border-bottom: 1px solid var(--line);
+}
+.pal-caret { color: var(--accent); font-size: 15px; font-weight: 700; padding-left: 3px; }
+#pal-input {
+  flex: 1 1 auto; min-width: 0; height: 26px; padding: 0 4px;
+  font: inherit; font-size: 13px; color: var(--fg);
+  background: none; border: 0; outline: none;
+}
+#pal-nofocus {
+  flex: 0 0 auto; padding: 6px 9px;
+  font-size: 10.5px; line-height: 1.45; color: var(--fg);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  cursor: text;
+}
+
+#pal-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 4px 0; }
+#pal-list::-webkit-scrollbar { width: 0; }
+
+.pal-sec {
+  padding: 6px 9px 2px;
+  font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.pal-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 9px; cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.pal-row.is-sel { background: var(--bg-sunk); border-left-color: var(--accent); }
+.pal-row .fav, .pal-row .letter {
+  width: 15px; height: 15px; flex: 0 0 auto; border-radius: 3px;
+}
+.pal-glyph {
+  width: 15px; height: 15px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  font-size: 12px; color: var(--fg-dim);
+}
+svg.pal-svg {
+  display: block; padding: 1px;
+  fill: none; stroke: var(--fg-dim); stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.pal-row.is-sel svg.pal-svg { stroke: var(--accent); }
+.pal-row.is-sel .pal-glyph { color: var(--accent); }
+.pal-text { flex: 1 1 auto; min-width: 0; }
+.pal-title {
+  display: block; font-size: 12.5px; color: var(--fg);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pal-sub {
+  display: block; font-size: 10.5px; color: var(--fg-faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pal-badge {
+  flex: 0 0 auto; padding: 1px 5px; border-radius: 4px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg-faint); background: var(--bg-sunk); border: 1px solid var(--line);
+}
+.pal-row.is-sel .pal-badge { color: var(--accent); border-color: var(--accent); }
+.pal-empty { padding: 14px 10px; font-size: 12px; color: var(--fg-faint); text-align: center; }
+.pal-foot {
+  display: flex; gap: 10px; flex: 0 0 auto;
+  padding: 5px 9px; border-top: 1px solid var(--line);
+  font-size: 10px; color: var(--fg-faint);
+}
+.pal-foot kbd {
+  display: inline-block; min-width: 12px; margin-right: 2px; padding: 0 3px;
+  font: inherit; font-size: 9.5px; text-align: center;
+  background: var(--bg-sunk); border: 1px solid var(--line); border-radius: 3px;
+}
+
+/* -------------------------------------------------------------- dialog */
+
+#dialog-back {
+  position: absolute; inset: 0; z-index: 120;
+  display: grid; place-items: center;
+  padding: 16px;
+  background: rgba(0,0,0,.35);
+}
+#dialog {
+  width: 100%; max-width: 310px;
+  background: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+#dialog-title { padding: 11px 13px 0; font-size: 13px; font-weight: 700; }
+#dialog-body { padding: 7px 13px 11px; font-size: 12px; color: var(--fg-dim); line-height: 1.5; }
+#dialog-body strong { color: var(--fg); }
+#dialog-body input[type="text"] {
+  width: 100%; height: 30px; margin-top: 9px; padding: 0 9px;
+  font: inherit; font-size: 13px; color: var(--fg);
+  background: var(--bg-sunk); border: 1px solid var(--line);
+  border-radius: 6px; outline: none;
+}
+#dialog-body input[type="text"]:focus { border-color: var(--accent); }
+.emoji-search {
+  width: 100%; height: 28px; margin-top: 9px; padding: 0 9px;
+  font: inherit; font-size: 12px; color: var(--fg);
+  background: var(--bg-sunk); border: 1px solid var(--line);
+  border-radius: 6px; outline: none;
+}
+.emoji-search:focus { border-color: var(--accent); }
+.emoji-grid {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;
+  margin-top: 6px; max-height: 160px; overflow-y: auto;
+  scrollbar-width: thin;
+}
+.emoji-status { padding: 4px 2px 0; font-size: 10.5px; color: var(--fg-faint); }
+.emoji-grid button {
+  aspect-ratio: 1; font-size: 16px; line-height: 1;
+  border: 1px solid transparent; border-radius: 5px;
+  background: transparent; cursor: pointer; padding: 0;
+}
+.emoji-grid button:hover { background: var(--bg-hover); }
+.emoji-grid button.is-on { border-color: var(--accent); background: var(--bg-active); }
+#dialog-actions {
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px;
+  padding: 9px 11px; border-top: 1px solid var(--line); background: var(--bg-sunk);
+}
+#dialog-actions button {
+  padding: 5px 11px; font: inherit; font-size: 12px;
+  color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+#dialog-actions button:hover { background: var(--bg-hover); }
+#dialog-actions .primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; font-weight: 600; }
+#dialog-actions .danger { color: #fff; background: var(--danger); border-color: transparent; font-weight: 600; }
+
+/* Search and the Manage cog share one row. The gap is the only spacing in the
+   everyday header — see test/geometry.js for why every pixel here is counted. */
+.head-row { display: flex; align-items: center; gap: 6px; }
+.search-row { position: relative; display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
+
+#manage-open {
+  flex: 0 0 auto; width: 30px; height: 30px;
+  display: grid; place-items: center; padding: 0;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px solid transparent; border-radius: var(--radius);
+  cursor: pointer;
+}
+#manage-open:hover { color: var(--fg); background: var(--bg-hover); }
+#manage-open svg {
+  width: 17px; height: 17px;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* Management shell header. No search field of its own — the row below is
+   reused as a section filter. */
+#manage-head { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+#manage-back { width: 26px; height: 26px; flex: 0 0 auto; }
+#manage-back svg {
+  width: 16px; height: 16px;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+#manage-title { font-size: 13px; font-weight: 650; color: var(--fg); }
+
+.search-icon {
+  position: absolute; left: 8px; width: 14px; height: 14px;
+  fill: none; stroke: var(--fg-faint); stroke-width: 2; stroke-linecap: round;
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  height: 30px;
+  padding: 0 26px 0 27px;
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg-sunk);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  outline: none;
+}
+#search:focus { border-color: var(--accent); background: var(--bg); }
+#search::placeholder { color: var(--fg-faint); }
+
+#clear-search {
+  position: absolute; right: 4px;
+  width: 20px; height: 20px; line-height: 18px;
+  font-size: 15px;
+}
+
+.icon-btn {
+  display: grid; place-items: center;
+  border: 0; border-radius: 5px;
+  color: var(--fg-dim); background: transparent;
+  cursor: pointer; padding: 0;
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--fg); }
+
+#views { display: flex; gap: 2px; margin-bottom: 6px; }
+
+.view-btn {
+  flex: 1;
+  padding: 6px 2px;
+  font: inherit; font-size: 11.5px;
+  color: var(--fg-dim);
+  background: transparent;
+  border: 0; border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.view-btn:hover { color: var(--fg); }
+.view-btn.is-active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+/* Management labels must never wrap, even at 250px — a two-line nav row was
+   exactly the defect the everyday row had. */
+.view-btn { white-space: nowrap; }
+
+/* The live tab count, now inside the search field rather than on a nav button.
+   Sits left of the clear button and yields to it. */
+.vcount {
+  position: absolute; right: 8px;
+  font-size: 10.5px; font-weight: 400; color: var(--fg-faint);
+  pointer-events: none;
+}
+#clear-search:not([hidden]) ~ .vcount { display: none; }
+
+/* ------------------------------------------------------------- settings */
+
+.set-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0;
+}
+.set-row + .set-row { border-top: 1px solid var(--line); }
+.set-row label { flex: 1 1 auto; font-size: 12px; }
+.set-row .hint { display: block; font-size: 11px; color: var(--fg-faint); margin-top: 2px; }
+.set-row input[type="range"] { flex: 0 0 118px; accent-color: var(--accent); }
+.set-row .val { flex: 0 0 34px; text-align: right; font-size: 11px; color: var(--fg-dim); }
+.set-row select, .set-row input[type="text"] {
+  flex: 0 0 auto; max-width: 55%;
+  height: 26px; padding: 0 6px;
+  font: inherit; font-size: 12px; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+}
+.set-row input[type="checkbox"] { flex: 0 0 auto; accent-color: var(--accent); }
+
+/* Diagnostic only, and deliberately loud: the whole point is to make the exact
+   edge of this document unmistakable against whatever surrounds it. */
+html.show-edges { outline: 2px solid #e0115f; outline-offset: -2px; }
+html.show-edges body { box-shadow: inset 0 0 0 2px rgba(224,17,95,.35); }
+
+.set-preview {
+  margin-top: 8px; padding: 7px 8px;
+  border: 1px dashed var(--line); border-radius: var(--radius);
+  background: var(--bg);
+}
+.set-preview .cap {
+  font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--fg-faint); margin-bottom: 4px;
+}
+
+/* --------------------------------------------------------- selection bar */
+
+#selbar {
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 5px 8px;
+  background: var(--bg-active);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+#selcount { color: var(--fg-dim); white-space: nowrap; }
+.selbar-actions { display: flex; gap: 3px; }
+.selbar-actions button {
+  padding: 3px 7px; font: inherit; font-size: 11px;
+  color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 5px; cursor: pointer;
+}
+.selbar-actions button:hover { background: var(--bg-hover); }
+.selbar-actions .danger { color: var(--danger); }
+.selbar-actions .ghost { border-color: transparent; background: transparent; font-size: 14px; padding: 3px 6px; }
+
+/* -------------------------------------------------------------- main */
+
+/*
+ * No native scrollbar, and therefore no reserved gutter.
+ *
+ * Styling ::-webkit-scrollbar at all opts Blink into a *classic* scrollbar,
+ * which permanently takes 8px of layout width whether you're scrolling or not.
+ * On a panel Chrome won't let go below ~360px, that is a real bite out of every
+ * tab title. `scrollbar-width: none` removes it on every platform — including
+ * one where the OS is set to always show scrollbars — and #scrollthumb below
+ * draws an overlay indicator in its place, over the content rather than beside
+ * it.
+ */
+#main {
+  flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+/*
+ * `scrollbar-width` and `::-webkit-scrollbar` do not cooperate: any
+ * ::-webkit-scrollbar rule puts Blink back into custom-scrollbar mode and takes
+ * precedence over the standard property. Declaring both was asking two
+ * mechanisms to argue, with the result depending on the build. Only the
+ * standard one is used.
+ */
+
+/* Drawn fixed to the panel, not inside the scroller — a child of a scrolling
+   box scrolls with it, and sticky positioning would still occupy a column. */
+#scrollthumb {
+  position: fixed; right: 2px; z-index: 60;
+  width: 5px; border-radius: 3px;
+  background: var(--fg-faint);
+  opacity: 0; transition: opacity .25s ease;
+  pointer-events: none;
+}
+#scrollthumb.show { opacity: .55; }
+
+/* Tight on the right: there is no scrollbar to clear any more, and every pixel
+   here comes straight off the end of a tab title. */
+.view { display: none; padding: 6px 3px 12px 6px; }
+.view.is-active { display: block; }
+
+.section-label {
+  padding: 8px 6px 4px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.empty {
+  padding: 28px 16px; text-align: center; color: var(--fg-faint); font-size: 12px;
+}
+.empty strong { display: block; color: var(--fg-dim); margin-bottom: 4px; font-size: 13px; }
+
+/* ------------------------------------------------------------ space bar */
+
+/*
+ * Spaces are the strongest control in the browsing hierarchy, so they get the
+ * underline treatment — the one underlined navigation on this screen, now that
+ * the view row is gone.
+ *
+ * One line, always. Wrapping to a second row would spend height on navigation
+ * in the panel's scarcest region; overflowing sideways spends nothing. The
+ * scrollbar is suppressed rather than styled: declaring any ::-webkit-scrollbar
+ * rule puts Blink into classic-scrollbar mode, which reserves width permanently
+ * and beats `scrollbar-width` — that is the bug from 0.12.1, and it must not
+ * come back through this door.
+ */
+.space-bar {
+  display: flex; flex-wrap: nowrap; gap: 2px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+}
+.schip {
+  display: flex; align-items: center; gap: 4px; flex: 0 0 auto;
+  height: 30px; padding: 0 8px;
+  font: inherit; font-size: 12px;
+  color: var(--fg-dim); background: transparent;
+  border: 0; border-bottom: 3px solid transparent;
+  cursor: pointer; white-space: nowrap;
+}
+.schip:hover { color: var(--fg); background: var(--bg-hover); }
+.schip.is-on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 650; }
+.schip.drag-over { border-bottom-color: var(--accent); border-bottom-style: dashed; background: var(--bg-active); }
+.schip .emo { font-size: 12px; line-height: 1; }
+.schip .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.schip .ct { font-size: 10px; color: var(--fg-faint); font-weight: 400; }
+
+/*
+ * Layer captions. Title case, not uppercase: these name a thing, they are not
+ * section furniture. Gaps are asymmetric on purpose — 2px below a caption ties
+ * it to its own controls, 9px above the next one separates the two layers. That
+ * difference is the whole reason neither needs a box around it.
+ */
+.layer-cap {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  font-size: 10.5px; font-weight: 600; line-height: 11px;
+  color: var(--fg-dim);
+  margin: 9px 0 2px;
+}
+.layer-cap.cap-jump { margin-top: 13px; }
+
+/* ---------------------------------------------------------- pinned strip */
+
+/* Pinned strip + group-jump bar, stuck to the top of the scroll area. */
+.stick {
+  position: sticky; top: 0; z-index: 5;
+  margin: -6px -6px 0;
+  /* Asymmetric because the negative margins are: the block deliberately spills
+     past the view's own padding so its background and shadow span the panel.
+     These two numbers are what put the sticky content on the SAME left and
+     right edges as the search field and the cog above it — 8px in from each
+     side. Changing the margins above means recomputing these. 5px at the bottom
+     keeps the group pills off the shadowed edge. */
+  padding: 3px 11px 5px 8px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 3px 6px -4px rgba(0,0,0,.35);
+}
+
+/* Tiles share the free width evenly and only wrap below their 28px minimum, so
+   a narrow panel adds a row rather than clipping. */
+.pin-strip {
+  display: grid; gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+  justify-items: stretch;
+}
+/* The separator between the two layers is whitespace, not a rule: a border here
+   reads as a container, which is exactly what the captions replace. */
+.pin-strip + .group-bar { margin-top: 9px; }
+
+.group-bar { display: flex; align-items: flex-start; gap: 6px; }
+/* One row, always — wrapping here is unbounded vertical growth in the scarcest
+   part of the panel. What doesn't fit scrolls sideways rather than hiding
+   behind a menu, which is both the same gesture as the space switcher above and
+   one fewer click to reach a group you can already half-see. Same scrollbar
+   rule as everywhere else: suppressed, never styled. */
+.gjump-list {
+  flex: 1 1 auto; display: flex; flex-wrap: nowrap; gap: 4px;
+  min-height: 20px; min-width: 0;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+/* A capsule with a name, sized to its text but bounded at both ends: too narrow
+   and the word is unreadable, too wide and one long rule name eats the row. */
+/* No shrinking: in a row that scrolls, squeezing every pill to 54px so they all
+   *nearly* fit is the worst of both — unreadable names AND a scrollbar. They
+   take the width their name needs, capped so one long rule can't own the row. */
+.gjump {
+  flex: 0 0 auto; min-width: 54px; max-width: 108px; height: 24px;
+  padding: 0 7px 0 5px;
+  display: flex; align-items: center; gap: 4px;
+  font: inherit; font-size: 10.5px; font-weight: 600;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px solid var(--line); border-radius: 999px; cursor: grab;
+  line-height: 1;
+}
+.gjump .gdot {
+  flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gc, var(--g-grey));
+}
+.gjump .gname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gjump:hover { color: var(--fg); border-color: var(--gc); background: var(--bg-hover); }
+.gjump:active { cursor: grabbing; transform: scale(.92); }
+.gjump.dragging { opacity: .35; }
+.gjump.drag-over { box-shadow: -3px 0 0 var(--accent); }
+
+/* Sits on the caption line, so it must not be what sets that line's height. */
+.gmenu {
+  flex: 0 0 auto; margin-left: auto;
+  width: 20px; height: 12px; padding: 0;
+  display: grid; place-items: center;
+  font: inherit; font-size: 13px; line-height: 1;
+  color: var(--fg-faint); background: transparent;
+  border: 0; border-radius: 4px; cursor: pointer;
+}
+.gmenu:hover { color: var(--fg); background: var(--bg-hover); }
+.pin-chip {
+  display: grid; place-items: center;
+  width: auto; min-width: 28px; max-width: 34px; height: 28px;
+  border-radius: 6px; cursor: pointer;
+  background: var(--bg-sunk);
+}
+.pin-chip:hover { background: var(--bg-hover); }
+.pin-chip.is-active { background: var(--bg-active); box-shadow: inset 0 0 0 1px var(--accent); }
+.pin-chip img, .pin-chip .letter { width: 16px; height: 16px; pointer-events: none; }
+.pin-chip.dragging { opacity: .4; }
+/* A pin that rides along in every space, so the two kinds are tellable apart
+   without hovering. Pins you assign to a space carry no dot. */
+.pin-chip.is-global { position: relative; }
+.pin-chip.is-global::after {
+  content: ''; position: absolute; right: 1px; bottom: 1px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--fg-faint); box-shadow: 0 0 0 1.5px var(--bg-sunk);
+}
+.pin-chip.drag-over { box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* --------------------------------------------------------------- rows */
+
+.tab-row {
+  display: flex; align-items: center; gap: 7px;
+  min-height: var(--row-h);
+  padding: 3px 5px 3px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+.tab-row:hover { background: var(--bg-hover); }
+.tab-row.is-active { background: var(--bg-active); font-weight: 600; }
+.tab-row.is-active::before {
+  content: ''; position: absolute; left: 0; top: 5px; bottom: 5px;
+  width: 3px; border-radius: 0 2px 2px 0; background: var(--accent);
+}
+.tab-row.is-selected { box-shadow: inset 0 0 0 1px var(--accent); }
+.tab-row.drag-over { box-shadow: 0 -2px 0 var(--accent); }
+.tab-row.dragging { opacity: .4; }
+
+/* The favicon lives in a slot so the icon can be swapped without rebuilding the
+   row. Without these rules the slot is an inline box, so it reserves descender
+   space below the 16px icon — the row centres the taller box, and the icon ends
+   up sitting high against the title. Making the slot an exact 16x16 grid keeps
+   icon and text on the same centre line. */
+.tab-row .fav-slot {
+  flex: 0 0 16px;
+  display: grid; place-items: center;
+  width: 16px; height: 16px;
+  line-height: 0;
+}
+.tab-row .fav { flex: 0 0 16px; width: 16px; height: 16px; border-radius: 3px; }
+.letter {
+  display: grid; place-items: center;
+  width: 16px; height: 16px; border-radius: 3px;
+  font-size: 9px; font-weight: 700; color: #fff; text-transform: uppercase;
+}
+
+.tab-row .title {
+  flex: 1 1 auto; min-width: 0;
+  /* Only the SIZE is tab-title-specific; the family is inherited from body. */
+  font-size: var(--title-size, 13px);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Wrapped titles: two lines, then ellipsis. The row grows to fit, so the
+   others must stop centring against it or they float in the middle. */
+body.wrap-titles .tab-row .title {
+  white-space: normal; text-overflow: clip;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; overflow-wrap: anywhere;
+}
+body.wrap-titles .tab-row { align-items: flex-start; padding-top: 6px; padding-bottom: 6px; }
+body.wrap-titles .tab-row .fav-slot,
+body.wrap-titles .tab-row .host,
+body.wrap-titles .tab-row .badge,
+body.wrap-titles .tab-row .close { margin-top: 1px; }
+body.wrap-titles .tab-row .host { white-space: nowrap; }
+.tab-row .host { color: var(--fg-faint); font-size: 11px; margin-left: 4px; }
+
+.tab-row .badge { flex: 0 0 auto; font-size: 11px; color: var(--fg-dim); }
+.tab-row .badge.count {
+  padding: 0 5px; border-radius: 999px;
+  font-size: 10px; font-weight: 700;
+  color: var(--accent-fg); background: var(--accent);
+}
+
+/* Two-line rows for bookmarks, history and page-text hits. */
+.tab-row .col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tab-row .col .title { flex: none; }
+.tab-row .sub {
+  font-size: 10.5px; color: var(--fg-faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.text-hit { align-items: flex-start; padding-top: 5px; padding-bottom: 5px; }
+.text-hit .letter { margin-top: 1px; }
+.text-hit .sub { color: var(--fg-dim); }
+
+.more-btn {
+  display: block; width: 100%;
+  margin: 2px 0 4px; padding: 5px;
+  font: inherit; font-size: 11px;
+  color: var(--accent); background: transparent;
+  border: 1px dashed var(--line); border-radius: 6px; cursor: pointer;
+}
+.more-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+
+.scan-bar {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  padding: 5px 4px 7px;
+}
+.scan-progress { flex: 1 1 auto; font-size: 11px; color: var(--fg-dim); }
+.scan-bar .ghost-btn { padding: 3px 8px; font-size: 11px; }
+.scan-empty { padding: 8px 6px 10px; font-size: 11.5px; color: var(--fg-faint); }
+
+.search-error {
+  margin: 4px 0 8px; padding: 7px 9px;
+  font-size: 11.5px; color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: 6px;
+}
+
+.revoke-btn {
+  display: block; margin: 2px 0 6px; padding: 3px 8px;
+  font: inherit; font-size: 10.5px;
+  color: var(--fg-faint); background: transparent;
+  border: 1px solid transparent; border-radius: 5px; cursor: pointer;
+}
+.revoke-btn:hover { color: var(--danger); border-color: var(--line); }
+
+.data-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 9px 2px 4px; margin-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.data-label {
+  flex: 1 1 auto;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--fg-faint);
+}
+.data-row .ghost-btn { padding: 4px 9px; font-size: 11px; }
+
+.version {
+  padding: 8px 4px 2px;
+  font-size: 10.5px; color: var(--fg-faint); text-align: center;
+}
+
+/* Always occupies its slot so the hit target never shifts under the cursor. */
+.tab-row .close {
+  flex: 0 0 22px; width: 22px; height: 22px; line-height: 20px;
+  font-size: 15px; opacity: 0;
+}
+.tab-row:hover .close, .tab-row.is-active .close { opacity: 1; }
+.tab-row .close:active { background: var(--bg-active); }
+
+/* -------------------------------------------------------------- groups */
+
+.group {
+  margin: 4px 0;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--gc) 8%, transparent);
+  border-left: 3px solid var(--gc);
+  padding: 2px 2px 2px 3px;
+}
+.group-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 6px; cursor: pointer;
+  font-size: 11.5px; font-weight: 700; color: var(--gc);
+}
+.group-head .caret { font-size: 9px; transition: transform .12s; }
+.group.collapsed .caret { transform: rotate(-90deg); }
+.group.collapsed .group-body { display: none; }
+.group-head .n { margin-left: auto; color: var(--fg-faint); font-weight: 500; }
+
+/* -------------------------------------------------------------- cards */
+
+.card {
+  padding: 8px 9px;
+  margin-bottom: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-sunk);
+}
+.card-top { display: flex; align-items: baseline; gap: 6px; }
+.card-name { font-weight: 600; flex: 1 1 auto; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-meta { font-size: 11px; color: var(--fg-faint); white-space: nowrap; }
+
+.fav-stack { display: flex; gap: 2px; margin: 6px 0; flex-wrap: wrap; }
+.fav-stack .letter { width: 15px; height: 15px; font-size: 8px; }
+.fav-stack .more { font-size: 10px; color: var(--fg-faint); align-self: center; margin-left: 2px; }
+
+.card-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.card-actions button {
+  padding: 3px 8px; font: inherit; font-size: 11px;
+  color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 5px; cursor: pointer;
+}
+.card-actions button:hover { background: var(--bg-hover); }
+.card-actions .danger { color: var(--danger); }
+.card-actions .primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+
+/* -------------------------------------------------------------- footer */
+
+#foot {
+  flex: 0 0 auto;
+  display: flex; gap: 3px;
+  padding: 6px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+/* Three equal columns, so the row never reflows as a label changes length —
+   "Dedupe (12)" must not push archive.is around. */
+.foot-btn {
+  flex: 1 1 0; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  height: 34px; padding: 0 2px;
+  font: inherit; font-size: 10.5px;
+  color: var(--fg-dim); background: transparent;
+  border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+  white-space: nowrap;
+}
+.foot-btn svg {
+  flex: 0 0 auto; width: 13px; height: 13px;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.foot-label { overflow: hidden; text-overflow: ellipsis; }
+.foot-btn:hover { background: var(--bg-hover); color: var(--fg); }
+.foot-btn.primary { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.foot-btn .glyph { font-size: 11px; }
+.foot-btn.narrow { flex: 0 0 30px; font-size: 14px; line-height: 1; }
+.foot-btn[disabled] { opacity: .4; cursor: default; }
+.foot-btn[disabled]:hover { background: transparent; color: var(--fg-dim); }
+
+/* -------------------------------------------------------------- sheet */
+
+#sheet {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+}
+.sheet-head {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 8px 9px 12px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+}
+#sheet-title { flex: 1 1 auto; }
+#sheet-close { width: 22px; height: 22px; font-size: 16px; }
+
+/* The sheet is a temporary overlay, so its gutter costs nothing permanent —
+   but a thin one still reads better next to the panel's overlay indicator. */
+#sheet-body { flex: 1 1 auto; overflow-y: auto; padding: 6px; scrollbar-width: thin; }
+#sheet-body::-webkit-scrollbar { width: 6px; }
+#sheet-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+.dupe-group { margin-bottom: 8px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.dupe-url {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px;
+  background: var(--bg-sunk);
+  font-size: 11px; color: var(--fg-dim);
+  border-bottom: 1px solid var(--line);
+}
+.dupe-url .u { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dupe-url .n { flex: 0 0 auto; font-weight: 600; color: var(--fg); }
+
+.dupe-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+.dupe-row:first-of-type { border-top: 0; }
+.dupe-row:hover { background: var(--bg-hover); }
+.dupe-row input { flex: 0 0 auto; margin: 0; cursor: pointer; }
+.dupe-row .t {
+  flex: 1 1 auto; min-width: 0; font-size: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dupe-row .tag {
+  flex: 0 0 auto; padding: 1px 6px; border-radius: 999px;
+  font-size: 10px; font-weight: 600;
+  color: var(--accent); background: var(--bg-active);
+}
+.dupe-row.is-keep .t { color: var(--fg-dim); }
+.dupe-row .tag.muted { color: var(--fg-dim); background: var(--bg-sunk); font-weight: 500; }
+
+.sheet-foot {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 8px;
+  border-top: 1px solid var(--line);
+}
+.sheet-foot .spacer { flex: 1 1 auto; }
+.ghost-btn, .danger-btn {
+  padding: 5px 10px; font: inherit; font-size: 12px;
+  border-radius: 6px; cursor: pointer;
+  color: var(--fg); background: var(--bg); border: 1px solid var(--line);
+}
+.ghost-btn:hover { background: var(--bg-hover); }
+.danger-btn { background: var(--danger); border-color: transparent; color: #fff; font-weight: 600; }
+.danger-btn:disabled { opacity: .45; cursor: default; }
+
+/* ------------------------------------------------------------ hover card */
+
+#tabpop {
+  position: fixed; z-index: 90;
+  width: 300px; max-width: calc(100vw - 16px);
+  padding: 0; overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
+  pointer-events: none;           /* never steals the hover it was born from */
+  animation: pop-in .1s ease-out;
+}
+@keyframes pop-in { from { opacity: 0; transform: translateY(3px); } }
+
+#tabpop .shot {
+  display: block; width: 100%; aspect-ratio: 16 / 10;
+  object-fit: cover; object-position: top center;
+  background: var(--bg-sunk);
+  border-bottom: 1px solid var(--line);
+}
+#tabpop .shot-none {
+  display: grid; place-items: center;
+  width: 100%; aspect-ratio: 16 / 10;
+  background: var(--bg-sunk);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px; color: var(--fg-faint); text-align: center; padding: 0 16px;
+  line-height: 1.5;
+}
+#tabpop .body { padding: 9px 10px 10px; }
+#tabpop .pop-title {
+  font-size: 12.5px; font-weight: 600; line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+#tabpop .pop-host {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--fg-dim);
+}
+#tabpop .pop-host .letter { width: 13px; height: 13px; font-size: 8px; }
+#tabpop .pop-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tabpop .pop-why {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-sunk);
+  font-size: 10.5px; color: var(--fg-dim); line-height: 1.4;
+}
+#tabpop .pop-why::before { content: 'Can’t sit beside the panel — '; color: var(--fg-faint); }
+#tabpop .chip {
+  padding: 1px 6px; border-radius: 999px;
+  font-size: 10px; font-weight: 600;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px solid var(--line);
+}
+#tabpop .chip.live { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+/* ------------------------------------------------------- context menu */
+
+#ctxmenu {
+  position: fixed; z-index: 100;
+  min-width: 170px; padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 8px 26px rgba(0,0,0,.22);
+}
+#ctxmenu button {
+  display: block; width: 100%; text-align: left;
+  padding: 6px 9px; font: inherit; font-size: 12px;
+  color: var(--fg); background: transparent;
+  border: 0; border-radius: 5px; cursor: pointer;
+}
+#ctxmenu button:hover { background: var(--bg-hover); }
+#ctxmenu button.danger { color: var(--danger); }
+#ctxmenu hr { margin: 4px 6px; border: 0; border-top: 1px solid var(--line); }
+
+/* -------------------------------------------------------------- toast */
+
+#toast {
+  position: fixed; left: 50%; bottom: 52px; transform: translateX(-50%);
+  z-index: 200;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--accent-fg); background: var(--fg);
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  animation: pop .16s ease-out;
+}
+@keyframes pop { from { opacity: 0; transform: translate(-50%, 6px); } }
+
+/* ------------------------------------------------------------- inputs */
+
+/* ---------------------------------------------------- management views
+ *
+ * Every management screen opens the same way: a sentence saying what this
+ * screen is for, then the one thing you most likely came here to do. It
+ * replaced a disabled text input that was being used to hold the sentence —
+ * which read as a field you were not allowed to type in.
+ */
+.view-intro {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 0 0 10px; padding: 0 0 10px;
+  border-bottom: 1px solid var(--line);
+}
+.intro-lede {
+  flex: 1 1 auto; min-width: 0; margin: 0;
+  font-size: 11.5px; line-height: 1.45; color: var(--fg-dim);
+  text-wrap: pretty;
+}
+.view-intro button {
+  flex: 0 0 auto; padding: 5px 10px; font: inherit; font-size: 11.5px; font-weight: 600;
+  background: var(--accent); color: var(--accent-fg);
+  border: 0; border-radius: 6px; cursor: pointer; white-space: nowrap;
+}
+.view-intro button:hover { filter: brightness(1.08); }
+
+/* A band inside a card: a small caption, then the controls it governs. Rule
+   cards read catch-then-act because they are built from two of these. */
+.band-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--fg-faint); margin: 0 0 5px;
+}
+.rule-band { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line); }
+.rule-band:first-of-type { border-top: 0; padding-top: 0; }
+
+.run-card { display: block; }
+.run-row { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
+.run-row button {
+  align-self: flex-start; padding: 5px 11px; font: inherit; font-size: 12px; font-weight: 600;
+  color: var(--fg); background: var(--bg-sunk);
+  border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.run-row button:hover { border-color: var(--accent); color: var(--accent); }
+
+.order-note, .filter-note {
+  margin: 2px 0 8px; padding: 6px 8px;
+  font-size: 11px; line-height: 1.45; color: var(--fg-dim);
+  background: var(--bg-sunk); border-radius: 6px;
+}
+
+.card-lede {
+  margin: 4px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--fg-dim);
+  text-wrap: pretty;
+}
+
+/* Snapshot composition — which space each tab was in, which is the question
+   "180 tabs · 1 window" never answered. */
+.snap-spaces { display: flex; flex-wrap: wrap; gap: 4px; margin: 7px 0 2px; }
+.snap-space {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 2px 7px; font-size: 10.5px;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px solid var(--line); border-radius: 999px;
+}
+.snap-space .sn { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snap-space .sc { font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.snap-space.is-gone { border-style: dashed; opacity: .75; }
+
+/* Folded-away reference and instrumentation. */
+details.help, details.adv { margin-top: 10px; }
+details.help > summary, details.adv > summary {
+  cursor: pointer; font-size: 11.5px; font-weight: 600; color: var(--fg-dim);
+  list-style: none; padding: 4px 0;
+}
+details.help > summary::-webkit-details-marker,
+details.adv > summary::-webkit-details-marker { display: none; }
+details.help > summary::before, details.adv > summary::before {
+  content: '▸'; display: inline-block; width: 12px; color: var(--fg-faint);
+}
+details.help[open] > summary::before, details.adv[open] > summary::before { content: '▾'; }
+details.help > summary:hover, details.adv > summary:hover { color: var(--accent); }
+details.help > summary:focus-visible, details.adv > summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px;
+}
+
+.about { text-align: center; }
+.about .version { margin: 0; }
+.about-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; margin: 6px 0 2px; }
+.doc-text {
+  margin: 0; max-height: 55vh; overflow: auto; text-align: left;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  font: 11px/1.45 ui-monospace, Menlo, monospace; color: var(--fg);
+}
+
+/* The one way into the palette, now that no key opens it. A peer of the cog —
+   NOT a child of .search-row, where #clear-search and .vcount are positioned
+   absolutely against the row: a flex child there shrinks the input out from
+   under them and they overhang its right edge.
+
+   Fixed box on purpose: this sits in the header, whose height test/geometry.js
+   holds to a budget, so the font stack must not get to decide it. */
+.pal-open {
+  flex: 0 0 auto; width: 26px; height: 26px;
+  display: grid; place-items: center; padding: 0;
+  font-size: 17px; line-height: 1; font-weight: 700;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px solid transparent; border-radius: var(--radius);
+  cursor: pointer;
+}
+.pal-open:hover { color: var(--accent); border-color: var(--line); }
+.pal-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pal-open:hover { color: var(--accent); }
+
+.perm-chip {
+  display: block; width: 100%;
+  margin: 6px 0 2px; padding: 7px 9px;
+  font: inherit; font-size: 11.5px; text-align: left;
+  color: var(--fg-dim); background: var(--bg-sunk);
+  border: 1px dashed var(--line); border-radius: 6px; cursor: pointer;
+}
+.perm-chip:hover { color: var(--fg); border-color: var(--accent); }
+.perm-chip b { color: var(--fg); font-weight: 600; }
+
+/* -------------------------------------------------------------- rules */
+
+.rule-card { border-left: 3px solid var(--gc, var(--g-grey)); }
+
+.rule-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+
+.rule-name {
+  flex: 1 1 auto; min-width: 0; height: 25px; padding: 0 7px;
+  font: inherit; font-weight: 600; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 5px; outline: none;
+}
+.rule-name:focus { border-color: var(--accent); }
+
+.swatch {
+  flex: 0 0 auto; width: 20px; height: 20px; padding: 0;
+  border: 2px solid var(--bg); border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--line);
+  background: var(--gc, var(--g-grey)); cursor: pointer;
+}
+.swatch:hover { box-shadow: 0 0 0 2px var(--accent); }
+
+.palette {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 6px 2px 8px;
+}
+.palette .swatch { width: 18px; height: 18px; }
+.palette .swatch.is-on { box-shadow: 0 0 0 2px var(--accent); }
+
+.rule-toggle {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--fg-dim); white-space: nowrap; cursor: pointer;
+}
+
+.rule-pats {
+  width: 100%; min-height: 54px; resize: vertical;
+  padding: 6px 7px; margin-bottom: 6px;
+  font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; outline: none;
+}
+.rule-pats:focus { border-color: var(--accent); }
+
+/* This is a button and was indistinguishable from the sentence above it — the
+   exact complaint that started this pass: you cannot tell what will happen when
+   you press something you cannot tell is pressable. */
+.rule-count {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin: 4px 0 2px; padding: 3px 8px 3px 7px; text-align: left;
+  font: inherit; font-size: 11px; color: var(--fg-dim);
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 999px; cursor: pointer;
+}
+.rule-count::before {
+  content: '▸'; font-size: 9px; color: var(--fg-faint); line-height: 1;
+}
+.rule-count:hover { color: var(--accent); border-color: var(--accent); }
+.rule-count:hover::before { color: var(--accent); }
+.rule-count:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.rule-hits { margin: 0 0 6px; padding: 5px 7px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+.rule-hits .hit {
+  display: flex; gap: 6px; align-items: center;
+  padding: 2px 0; font-size: 11px; color: var(--fg-dim);
+}
+.rule-hits .hit span:last-child {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* the two things a rule can do — file into a space, group in the tab strip */
+.rule-acts {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 6px 7px; margin-bottom: 5px;
+  background: var(--bg-sunk); border: 1px solid var(--line); border-radius: 6px;
+}
+.ract {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: var(--fg-dim); cursor: pointer;
+}
+.ract-k { flex: 0 0 auto; }
+.ract-sel {
+  flex: 1 1 auto; min-width: 0; height: 22px; padding: 0 4px;
+  font: inherit; font-size: 11.5px; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 5px; outline: none;
+}
+.ract-sel:focus { border-color: var(--accent); }
+
+.rule-doing {
+  padding: 0 2px 5px; font-size: 11px; line-height: 1.45; color: var(--fg-faint);
+}
+.rule-doing.is-idle { color: var(--danger); }
+
+.icon-btn.rank {
+  /* Priority is not decoration — when two rules catch the same tab this is what
+     decides it. At 18px and --fg-faint these were near-invisible next to the
+     name field, which is a poor place to hide the only control that resolves a
+     clash. */
+  flex: 0 0 auto; width: 22px; height: 22px; padding: 0;
+  font-size: 13px; line-height: 1; color: var(--fg-dim);
+}
+.icon-btn.rank:disabled { opacity: .25; cursor: default; }
+.icon-btn.rank:not(:disabled):hover { color: var(--accent); }
+
+.rule-clash {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  padding: 6px 8px; margin-bottom: 6px;
+  font-size: 11px; line-height: 1.45; color: var(--fg-dim);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  border-radius: 6px;
+}
+
+/* a rule that only files loses the group colour it isn't using */
+.rule-card.no-group { border-left-color: var(--line); }
+.rule-card.no-group .swatch, .rule-card.no-group .palette { display: none; }
+
+.global-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 9px; margin-bottom: 8px;
+  font-size: 12px; color: var(--fg-dim);
+  background: var(--bg-sunk); border: 1px solid var(--line);
+  border-radius: var(--radius); cursor: pointer;
+}
+.global-toggle b { color: var(--fg); font-weight: 600; }
+.hint { padding: 2px 4px 10px; font-size: 11px; color: var(--fg-faint); line-height: 1.5; }
+.hint code {
+  padding: 1px 4px; border-radius: 4px;
+  background: var(--bg-sunk); font-size: 10.5px;
+}
+
+/* A settings action is a label, not a paragraph: "Grant page access" was
+   wrapping to three lines inside the narrow right-hand column. */
+.set-row > button { white-space: nowrap; }
+
+/* ------------------------------------------------ page-text search notes */
+.scan-note {
+  margin: 2px 0 6px; padding: 5px 8px;
+  font-size: 11px; line-height: 1.45; color: var(--fg-dim);
+  background: var(--bg-sunk); border-radius: 6px;
+}
+.link-btn {
+  padding: 0; font: inherit; font-size: 11px; color: var(--accent);
+  background: none; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+}
+.excl-list { min-height: 62px; }
+.badge.is-private { color: var(--fg-dim); border-color: var(--line); }
+.space-card .card-actions button.is-on { color: var(--accent); border-color: var(--accent); }

@@ -1,0 +1,25 @@
+{
+  "name": "siderail",
+  "version": "0.26.0",
+  "private": true,
+  "description": "Vertical tabs, workspaces, command palette and session rewind in the browser side panel.",
+  "license": "Apache-2.0",
+  "author": "Robin Landy",
+  "repository": { "type": "git", "url": "https://github.com/RobinLandy/SideRail.git" },
+  "homepage": "https://github.com/RobinLandy/SideRail",
+  "bugs": "https://github.com/RobinLandy/SideRail/issues",
+  "type": "commonjs",
+  "scripts": {
+    "lint": "node test/lint.js",
+    "test": "node test/lint.js && node test/e2e.js && node test/geometry.js",
+    "test:data": "node test/bh.js",
+    "shots": "node test/shot.js",
+    "package": "node tools/package.mjs",
+    "package:store": "node tools/package.mjs --store",
+    "update:defuddle": "node tools/update-defuddle.mjs",
+    "test:geometry": "node test/geometry.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

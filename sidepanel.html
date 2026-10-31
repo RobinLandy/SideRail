@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SideRail</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="app">
+    <header id="head">
+      <!-- Management only. Browsing has no title bar of its own: the space
+           switcher is the heading. -->
+      <div id="manage-head" hidden>
+        <button id="manage-back" class="icon-btn" aria-label="Back to browsing"
+                title="Back to browsing">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="15 5 8 12 15 19"></polyline>
+          </svg>
+        </button>
+        <span id="manage-title">Manage SideRail</span>
+      </div>
+
+      <!-- Management sections. Browsing is not one of them: it is the shell you
+           came from, reached with the back arrow. -->
+      <nav id="views" role="tablist" hidden>
+        <button class="view-btn is-active" data-view="spaces" role="tab">Spaces</button>
+        <button class="view-btn" data-view="rules" role="tab">Rules</button>
+        <button class="view-btn" data-view="rewind" role="tab">Rewind</button>
+        <button class="view-btn" data-view="settings" role="tab">Settings</button>
+      </nav>
+
+      <div class="head-row">
+      <div class="search-row">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+        </svg>
+        <input id="search" type="text" autocomplete="off" spellcheck="false"
+               placeholder="Search tabs…" aria-label="Search tabs">
+        <button id="clear-search" class="icon-btn" title="Clear" hidden>&times;</button>
+        <span id="tab-count" class="vcount" hidden></span>
+      </div>
+      <button id="open-palette" class="pal-open"
+              title="Commands, and search that reaches further"
+              aria-label="Commands, and search that reaches further">&rsaquo;</button>
+      <button id="manage-open" aria-label="Manage SideRail" title="Manage SideRail">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.2"></circle>
+          <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"></path>
+        </svg>
+      </button>
+      </div>
+
+    </header>
+
+    <div id="selbar" hidden>
+      <span id="selcount">0 selected</span>
+      <div class="selbar-actions">
+        <button data-bulk="pin" title="Pin / unpin">Pin</button>
+        <button data-bulk="mute" title="Mute / unmute">Mute</button>
+        <button data-bulk="group" title="Group these tabs">Group</button>
+        <button data-bulk="close" class="danger" title="Close these tabs">Close</button>
+        <button data-bulk="clear" class="ghost" title="Clear selection">&times;</button>
+      </div>
+    </div>
+
+    <main id="main">
+      <section id="view-tabs" class="view is-active"></section>
+      <section id="view-spaces" class="view"></section>
+      <section id="view-rules" class="view"></section>
+      <section id="view-rewind" class="view"></section>
+      <section id="view-settings" class="view"></section>
+    </main>
+
+    <!-- Three peers, one row, always in the same order and always present.
+         Dedupe greys out rather than vanishing: a button that appears and
+         disappears teaches you nothing about where it lives. -->
+    <footer id="foot">
+      <button id="act-dedupe" class="foot-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="12" height="12" rx="2"></rect>
+          <path d="M9 21h10a2 2 0 0 0 2-2V9"></path>
+        </svg>
+        <span class="foot-label">Dedupe</span>
+      </button>
+      <button id="act-defuddle" class="foot-btn"
+              title="Strip this page down to its article">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 3h14v18H5z"></path>
+          <path d="M8.5 8h7M8.5 12h7M8.5 16h4"></path>
+        </svg>
+        <span class="foot-label">Defuddle</span>
+      </button>
+      <button id="act-archive" class="foot-btn"
+              title="Open this page on archive.is">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="5" rx="1"></rect>
+          <path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"></path>
+          <path d="M10 13h4"></path>
+        </svg>
+        <span class="foot-label">archive.is</span>
+      </button>
+    </footer>
+  </div>
+
+  <div id="sheet" hidden>
+    <div class="sheet-head">
+      <span id="sheet-title">Duplicate tabs</span>
+      <button id="sheet-close" class="icon-btn" title="Cancel">&times;</button>
+    </div>
+    <div id="sheet-body"></div>
+    <div class="sheet-foot">
+      <button id="sheet-all" class="ghost-btn">All</button>
+      <button id="sheet-none" class="ghost-btn">None</button>
+      <span class="spacer"></span>
+      <button id="sheet-cancel" class="ghost-btn">Cancel</button>
+      <button id="sheet-go" class="danger-btn">Close 0 tabs</button>
+    </div>
+  </div>
+
+  <div id="dialog-back" hidden>
+    <div id="dialog" role="dialog" aria-modal="true">
+      <div id="dialog-title"></div>
+      <div id="dialog-body"></div>
+      <div id="dialog-actions"></div>
+    </div>
+  </div>
+
+  <div id="palette" hidden>
+    <div id="pal-box" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="pal-top">
+        <span class="pal-caret" aria-hidden="true">&rsaquo;</span>
+        <input id="pal-input" type="text" autocomplete="off" spellcheck="false"
+               role="combobox" aria-expanded="true" aria-controls="pal-list"
+               placeholder="Search tabs, run a command, or type a URL"
+               aria-label="Command palette">
+        <button id="pal-close" class="icon-btn" title="Close">&times;</button>
+      </div>
+      <!-- Shown only when Chrome has left keyboard focus on the page. See
+           insistFocus() — the panel cannot take focus for itself. -->
+      <div id="pal-nofocus" hidden></div>
+      <div id="pal-list" role="listbox" aria-label="Results"></div>
+      <div class="pal-foot">
+        <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
+        <span><kbd>&crarr;</kbd> run</span>
+        <span><kbd>esc</kbd> close</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="scrollthumb"></div>
+
+  <div id="tabpop" hidden></div>
+
+  <div id="ctxmenu" hidden></div>
+  <div id="toast" hidden></div>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "SideRail",
+  "version": "0.26.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzSRdS0PbRzNfpngxJH/MCWgfPlrObQolB1r2Wm7ZchwFo20Mp5KBG6hDARi4baqEQVWZEqe0P4++x/ouCJ4euRo2TYe0SMW+ilLh6y0fAKBuGLnowi983nIKsz+Ne26VBOy9A6X+LBZCrUsj3JeghTHg+6ZZuACz5FZdwYL+mrdBtAovKoSob8/qTrdYYoe5zyO/oB4WvJxl0v029J/1t3da1HhY7aAaGASgRT3jK65DnJoDb3WXPF+VzCa/1GWACrx1FRRTNJJh1tZ234OSIMgezEC6vdooKyZPw0RmDDHkdkfaJ6oRXT6SrHRG0DzuVYVYuBXmS+0kW9l3BRRUXQIDAQAB",
+  "description": "Vertical tabs, workspaces, command palette and session rewind in the side panel. Nothing leaves your browser.",
+  "homepage_url": "https://github.com/RobinLandy/SideRail",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "tabs",
+    "tabGroups",
+    "sidePanel",
+    "storage",
+    "alarms"
+  ],
+  "optional_permissions": [
+    "bookmarks",
+    "history",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "SideRail — vertical tabs & workspaces",
+    "default_icon": {
+      "16": "icons/toolbar16-flat.png",
+      "32": "icons/toolbar32-flat.png",
+      "48": "icons/toolbar48-flat.png",
+      "128": "icons/toolbar128-flat.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "open-panel": {
+      "suggested_key": {
+        "default": "Alt+B",
+        "mac": "Command+Shift+B"
+      },
+      "description": "Open the SideRail panel"
+    },
+    "group-by-domain": {
+      "suggested_key": {
+        "default": "Alt+G",
+        "mac": "Command+Shift+G"
+      },
+      "description": "Group tabs by domain"
+    },
+    "ungroup-all": {
+      "suggested_key": {
+        "default": "Alt+Shift+G"
+      },
+      "description": "Ungroup all tabs"
+    }
+  }
+}

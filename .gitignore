@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+.AppleDouble
+
+# Dependencies
+node_modules/
+
+# Build output / releases
+*.zip
+*.crx
+dist/
+
+# Signing keys — MUST never be committed
+*.pem
+*.key
+key.pem
+
+# Secrets / environment
+.env
+.env.*
+*.secret
+
+# Local data backups (exported extension storage)
+*-backup.json
+*.backup.json
+siderail-backup-*.json
+
+# Generated screenshots
+shot-*.png
+test/shots/
+
+# Editors and assistants
+.vscode/
+.idea/
+*.swp
+.claude/
+
+# Private working documents — kept in the private repository only, never in the public one
+/HANDOVER.md
+/STORE-READINESS.md

@@ -1,0 +1,8 @@
+{
+  "name": "defuddle",
+  "version": "0.19.2",
+  "license": "MIT",
+  "source": "https://github.com/kepano/defuddle",
+  "file": "dist/index.js (UMD browser build)",
+  "vendoredAt": "2026-08-09"
+}
